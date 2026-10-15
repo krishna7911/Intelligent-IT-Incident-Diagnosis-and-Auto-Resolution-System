@@ -1,0 +1,26 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: helpdesk
+      MYSQL_USER: helpdesk
+      MYSQL_PASSWORD: helpdesk
+    ports: ["3306:3306"]
+    volumes: ["dbdata:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 5s
+      retries: 20
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: mysql+pymysql://helpdesk:helpdesk@db:3306/helpdesk
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      db: {condition: service_healthy}
+    ports: ["8000:8000"]
+volumes:
+  dbdata:

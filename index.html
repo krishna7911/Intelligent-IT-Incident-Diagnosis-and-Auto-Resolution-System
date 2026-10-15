@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HelpRack - AI IT Helpdesk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="chassis">
+
+  <!-- Left rail -->
+  <aside class="rail">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="brand-name">HelpRack</span>
+    </div>
+    <nav class="nav" aria-label="Views">
+      <button class="nav-btn is-on" data-view="board"><span class="led-dot"></span>Ticket rack</button>
+      <button class="nav-btn" data-view="kb"><span class="led-dot"></span>Knowledge base</button>
+      <button class="nav-btn" data-view="team"><span class="led-dot"></span>Team load</button>
+    </nav>
+    <div class="rail-foot">
+      <div class="engine" id="engineBadge">AI engine: checking...</div>
+      <button class="key key-small" id="themeBtn" title="Switch between day and night shift">
+        <span class="led" id="themeLed"></span><span id="themeLabel">Night shift</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>Support rack</h1>
+        <p class="sub">Every ticket is classified, prioritised and routed the moment it arrives.</p>
+      </div>
+      <div class="actions">
+        <button class="key" id="refreshBtn"><span class="led"></span>Refresh</button>
+        <button class="key" id="autoAllBtn"><span class="led"></span>Auto-assign all</button>
+        <button class="key key-primary" id="newBtn"><span class="led"></span>New ticket</button>
+      </div>
+    </header>
+
+    <!-- BOARD -->
+    <section id="view-board" class="view">
+      <div class="gauges" id="gauges" aria-live="polite"></div>
+
+      <div class="mix-wrap">
+        <div class="mix-title">Open tickets by category</div>
+        <div class="mix" id="mix" role="img" aria-label="Category mix"></div>
+        <div class="mix-legend" id="mixLegend"></div>
+      </div>
+
+      <div class="filters">
+        <input id="fQ" type="search" placeholder="Search title, description or requester" aria-label="Search tickets">
+        <select id="fStatus" aria-label="Status"><option value="">Any status</option></select>
+        <select id="fPriority" aria-label="Priority"><option value="">Any priority</option></select>
+        <select id="fCategory" aria-label="Category"><option value="">Any category</option></select>
+        <label class="check"><input type="checkbox" id="fUnassigned"> Unassigned only</label>
+      </div>
+
+      <div class="rack" id="rack"></div>
+    </section>
+
+    <!-- KNOWLEDGE BASE -->
+    <section id="view-kb" class="view" hidden>
+      <div class="panel">
+        <h2>Search the support docs</h2>
+        <p class="muted">The same documents HelpBot and "Draft AI reply" use.</p>
+        <div class="kb-search">
+          <input id="kbQ" type="search" placeholder="e.g. vpn error 809, reset mfa, outlook outbox">
+          <button class="key key-primary" id="kbGo"><span class="led"></span>Search docs</button>
+        </div>
+        <div id="kbResults" class="kb-results"></div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section id="view-team" class="view" hidden>
+      <div class="team" id="team"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Ticket drawer -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-hidden="true" aria-label="Ticket details"></aside>
+
+<!-- New ticket dialog -->
+<dialog id="newDlg">
+  <form method="dialog" id="newForm" class="dlg">
+    <div class="dlg-head">
+      <h2>New ticket</h2>
+      <button type="button" class="key key-small" id="newClose">Close</button>
+    </div>
+    <label>Title<input name="title" required minlength="3" placeholder="What is going wrong?"></label>
+    <label>Describe the problem<textarea name="description" required minlength="5" rows="4" placeholder="What happened, when, and what have you tried?"></textarea></label>
+    <div class="two">
+      <label>Your name<input name="requester_name" required minlength="2"></label>
+      <label>Work email<input name="requester_email" type="email" required></label>
+    </div>
+
+    <div class="scan">
+      <button type="button" class="key key-ai" id="scanBtn"><span class="led"></span>Scan with AI</button>
+      <div id="scanOut" class="scan-out">Let the model predict the category and priority before you submit.</div>
+    </div>
+
+    <div class="two">
+      <label>Category<select name="category"><option value="">Auto (AI decides)</option></select></label>
+      <label>Priority<select name="priority"><option value="">Auto (AI decides)</option></select></label>
+    </div>
+    <div class="dlg-foot">
+      <button type="submit" class="key key-primary" id="submitTicket"><span class="led"></span>Submit ticket</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- HelpBot -->
+<button class="key key-ai bot-toggle" id="botToggle"><span class="led"></span>Ask HelpBot</button>
+<section class="bot" id="bot" hidden aria-label="HelpBot chat">
+  <header><strong>HelpBot</strong><span class="muted">Answers from your support docs</span>
+    <button class="key key-small" id="botClose">Close</button></header>
+  <div class="bot-log" id="botLog"></div>
+  <form id="botForm" class="bot-form">
+    <input id="botInput" placeholder="Describe your problem..." autocomplete="off" required>
+    <button class="key key-primary key-small" type="submit"><span class="led"></span>Send</button>
+  </form>
+</section>
+
+<div id="toasts" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body>
+</html>
